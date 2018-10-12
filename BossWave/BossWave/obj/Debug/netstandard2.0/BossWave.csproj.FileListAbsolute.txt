@@ -1,0 +1,20 @@
+C:\Users\Emil S. Kolvig-Raun\git\Ny mappe\BossWave\BossWave\bin\Debug\netstandard2.0\BossWave.deps.json
+C:\Users\Emil S. Kolvig-Raun\git\Ny mappe\BossWave\BossWave\bin\Debug\netstandard2.0\BossWave.dll
+C:\Users\Emil S. Kolvig-Raun\git\Ny mappe\BossWave\BossWave\bin\Debug\netstandard2.0\BossWave.pdb
+C:\Users\Emil S. Kolvig-Raun\git\Ny mappe\BossWave\BossWave\obj\Debug\netstandard2.0\BossWave.csprojAssemblyReference.cache
+C:\Users\Emil S. Kolvig-Raun\git\Ny mappe\BossWave\BossWave\obj\Debug\netstandard2.0\BossWave.csproj.CoreCompileInputs.cache
+C:\Users\Emil S. Kolvig-Raun\git\Ny mappe\BossWave\BossWave\obj\Debug\netstandard2.0\BossWave.AssemblyInfoInputs.cache
+C:\Users\Emil S. Kolvig-Raun\git\Ny mappe\BossWave\BossWave\obj\Debug\netstandard2.0\BossWave.AssemblyInfo.cs
+C:\Users\Emil S. Kolvig-Raun\git\Ny mappe\BossWave\BossWave\obj\Debug\netstandard2.0\BossWave.dll
+C:\Users\Emil S. Kolvig-Raun\git\Ny mappe\BossWave\BossWave\obj\Debug\netstandard2.0\BossWave.pdb
+C:\Users\Emil S. Kolvig-Raun\git\NETxBMS_BWPlugin\BossWave\BossWave\bin\Debug\netstandard2.0\BossWave.deps.json
+C:\Users\Emil S. Kolvig-Raun\git\NETxBMS_BWPlugin\BossWave\BossWave\bin\Debug\netstandard2.0\BossWave.dll
+C:\Users\Emil S. Kolvig-Raun\git\NETxBMS_BWPlugin\BossWave\BossWave\bin\Debug\netstandard2.0\BossWave.pdb
+C:\Users\Emil S. Kolvig-Raun\git\NETxBMS_BWPlugin\BossWave\BossWave\bin\Debug\netstandard2.0\nxaXIO.PlugKit.dll
+C:\Users\Emil S. Kolvig-Raun\git\NETxBMS_BWPlugin\BossWave\BossWave\obj\Debug\netstandard2.0\BossWave.csprojAssemblyReference.cache
+C:\Users\Emil S. Kolvig-Raun\git\NETxBMS_BWPlugin\BossWave\BossWave\obj\Debug\netstandard2.0\BossWave.csproj.CoreCompileInputs.cache
+C:\Users\Emil S. Kolvig-Raun\git\NETxBMS_BWPlugin\BossWave\BossWave\obj\Debug\netstandard2.0\BossWave.AssemblyInfoInputs.cache
+C:\Users\Emil S. Kolvig-Raun\git\NETxBMS_BWPlugin\BossWave\BossWave\obj\Debug\netstandard2.0\BossWave.AssemblyInfo.cs
+C:\Users\Emil S. Kolvig-Raun\git\NETxBMS_BWPlugin\BossWave\BossWave\obj\Debug\netstandard2.0\BossWave.csproj.CopyComplete
+C:\Users\Emil S. Kolvig-Raun\git\NETxBMS_BWPlugin\BossWave\BossWave\obj\Debug\netstandard2.0\BossWave.dll
+C:\Users\Emil S. Kolvig-Raun\git\NETxBMS_BWPlugin\BossWave\BossWave\obj\Debug\netstandard2.0\BossWave.pdb
