@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    @Styles.Render("~/Content/appearence/navbar.css")
+    @Styles.Render("~/Content/appearence/background.css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+</head>
+<body class="outer-frame" onmousemove="mouse_position(event)">
+    <div id="gripcontainer">
+        <div id="grip">
+            <div class="verticalline"></div>
+        </div>
+    </div>
+    <div id="nav-bar-id" class="nav-bar-class">
+        <div class="nav-modal">
+            <span class="close-nav">&times;</span>
+            <ul class="pages">
+                <li><a class="profile" onclick="load_profile()">Profile</a></li>
+                <li><a class="itemtree" onclick="load_items()">Items</a></li>
+                <li><a class="subscribtions" onclick="load_subscribtions()">Subscribtions</a></li>
+                <li><a class="clients" onclick="load_clients()">Clients</a></li>
+            </ul>
+            <div id="hr-brick"><hr class="inline-hr" /></div>
+            
+        </div>
+    </div>
+
+
+    <div id="body-container" class="container-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - BossWave Plugin for NETx BMS : ASP.NET Application</p>
+        </footer>
+    </div>
+</body>
+
+<script src="~/Scripts/jquery.signalR-2.3.0.min.js"></script>
+<script src="~/signalr/js"></script>
+<script src="~/Scripts/Page/base_logic.js"></script>
+<script src="~/Scripts/Page/nav_logic.js"></script>
+
+</html>

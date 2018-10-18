@@ -1,0 +1,63 @@
+﻿html, body {
+    margin: 0;
+    padding: 0;
+    color: snow;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-size: 14px;
+    background-color: rgba(33, 47, 61, 1); /* Black w/ opacity */
+}
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 2px solid rgba(91, 44, 111, 1);
+    margin: 1em 0;
+    padding: 0;
+}
+
+footer {
+    color: rgba(108, 52, 131, 1);
+}
+
+.container-content {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5%;
+    width: 75%;
+    height: 100%;
+}
+
+/* width */
+::-webkit-scrollbar {
+    width: 0px;
+}
+
+/* width */
+.outer-frame::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Track */
+.outer-frame::-webkit-scrollbar-track {
+    background: #1B2631;
+}
+
+/* Handle */
+.outer-frame::-webkit-scrollbar-thumb {
+    background: rgba(108, 52, 131, 0.6);
+    border-radius: 8px;
+}
+
+/* Handle on hover */
+.outer-frame::-webkit-scrollbar-thumb:hover {
+    background: rgba(91, 44, 111, 1);
+}
+
+.temp-disable-scroll {
+    overflow: hidden;
+    background-color: #1B2631;
+}
+
+
+
