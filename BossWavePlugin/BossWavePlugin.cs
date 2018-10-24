@@ -8,62 +8,70 @@ using nxaXIO.PlugKit.Nodes.Requests;
 using nxaXIO.PlugKit.Plugin;
 using nxaXIO.PlugKit.Plugin.Results;
 using BossWavePlugin.Host;
+using Newtonsoft.Json.Linq;
+using BWBinding;
+using BWBinding.Common;
+using BWBinding.Utils;
+using System.Linq;
+using System.Text;
+using System.Threading;
 
 namespace BossWavePlugin
 {
     [PluginInfo("BossWavePlugin","BossWave Binding","1.0.0")]
     public class BossWavePlugin : PluginBase
     {
+        public IPluginHost host;
+        public static BossWavePlugin Instance { get; protected set; } // Using a singleton instance to communicate
+        protected WebHost bwSignalR = new WebHost();
 
-        public class MyItemObserver : ItemObserver
-        {
-            public delegate  void ValueChangeDelegate(object tag, IItemFacade facade);
+        private Observer itemObserver;
 
-            protected ValueChangeDelegate mHandler_;
-            public MyItemObserver(ValueChangeDelegate handler)
-            {
-                mHandler_ = handler;    
-            }
+        private List<string> itemsChanged;
 
-            public override bool ItemValueChanged(object tag, IItemFacade itemFacade)
-            {
-                if(mHandler_!= null)
-                {
-                    mHandler_(tag, itemFacade);
-                }
-                return true;
-            }
-        }
+        public Dictionary<string, JObject> bwSubItems;
+        public Dictionary<string, JObject> bwPubItems;
+        public Dictionary<string, Thread> loopingPubItems;
+        public List<string> entities;
 
+        BossWaveClient bwClient;
 
-        readonly MyItemObserver mItemObserver__;
+        public JObject config;
 
-        public static BossWavePlugin Instance
-        {
-            get; protected set; 
-            
-        }
         public BossWavePlugin()
         {
             Instance = this;
-            mItemObserver__ = new MyItemObserver(ItemValueChange);
         }
-        protected WebHost mSignalr_ = new WebHost();
-        protected SortedList<string, IItemFacade> mItems_ = new SortedList<string, IItemFacade>();
       
         public override bool Init(uint data1, uint data2)
         {
-            /*
-            if (!Debugger.IsAttached)
+            host = mHost_;
+
+            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\bwconfig.json";
+            using (StreamReader r = new StreamReader(path))
             {
-                Debugger.Launch();
-                Debugger.Break();
-            }*/
+                config = JObject.Parse(r.ReadToEnd());
+            }
+
+            bwClient = new BossWaveClient("localhost", BWDefaults.DEFAULT_PORT_NUMBER);
+            bwSubItems = new Dictionary<string, JObject>();
+            bwPubItems = new Dictionary<string, JObject>();
+            loopingPubItems = new Dictionary<string, Thread>();
+            entities = new List<string>();
+            itemsChanged = new List<string>();
+            itemObserver = new Observer(BWItemValueChange);
             AppDomain currentDomain = AppDomain.CurrentDomain;
             currentDomain.AssemblyResolve += LoadFromSameFolder;
+
+            try
+            {
+                bwClient.Connect();
+            } catch (Exception e)
+            {
+                mHost_.WriteLog(LogLevel.Error, e.Message);
+            }
             return true;
         }
-
 
         static Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)
         {
@@ -75,26 +83,82 @@ namespace BossWavePlugin
                 Assembly assembly = Assembly.LoadFrom(assemblyPath);
                 return assembly;
             }
-
             return null;
         }
 
         public override bool RegisterItems()
         {
-            var br = mHost_.GetBranch(@"NETx\XIO\PlugMan");
-            if (br.ResultCode == GetBranchesultCodes.OK)
+            ItemCreateOptions sub_options = new ItemCreateOptions
             {
-                RegisterTree(br.BranchFacade);
+                Description = "Subscription",
+                Datatype = typeof(string),
+                AccessRights = ItemAccess.ReadWrite
+            };
 
+            ItemCreateOptions pub_options = new ItemCreateOptions
+            {
+                Description = "Publishing",
+                Datatype = typeof(string),
+                AccessRights = ItemAccess.ReadWrite
+            };
+
+            for (int i = 0; i < Int32.Parse(config["entity-items"].ToString()); i++)
+            {
+                mHost_.CreateItem(@"NETx\XIO\BossWave\Identity\Ent" + i, new ItemCreateOptions { Description = "Entity path", Datatype = typeof(string), AccessRights = ItemAccess.ReadWrite });
             }
+
+            for (int i = 0; i < Int32.Parse(config["sub-items"].ToString()); i++)
+            {
+                var subItem = mHost_.CreateItem(@"NETx\XIO\BossWave\Subscriptions\Sub" + i, sub_options);
+                subItem.ItemFacade.RegisterObserver(itemObserver);
+            }
+
+            for (int i = 0; i < Int32.Parse(config["pub-items"].ToString()); i++)
+            {
+                var pubItem = mHost_.CreateItem(@"NETx\XIO\BossWave\Pulishes\Pub" + i, pub_options);
+                pubItem.ItemFacade.RegisterObserver(itemObserver);
+            }
+
+            // creating mockup KNX item tree
+            mHost_.CreateItem(@"NETx\XIO\KNX\001", new ItemCreateOptions { Description = "Fictional radiator", Datatype = typeof(int), AccessRights = ItemAccess.ReadWrite });
+            mHost_.CreateItem(@"NETx\XIO\KNX\011", new ItemCreateOptions { Description = "Fictional lighting", Datatype = typeof(int), AccessRights = ItemAccess.ReadWrite });
+            mHost_.CreateItem(@"NETx\XIO\KNX\111", new ItemCreateOptions { Description = "Fictional server", Datatype = typeof(int), AccessRights = ItemAccess.ReadWrite });
+
+            foreach (var item in mHost_.GetBranch(@"NETx\XIO\KNX").BranchFacade.GetItems())
+            {
+                item.RegisterObserver(itemObserver);
+            }
+
             return true;
+        }
+
+        private void LoadBWItems()
+        {
+            foreach (var item in mHost_.GetBranch(@"NETx\XIO\BossWave\Subscriptions").BranchFacade.GetItems())
+            {
+                if (item.GetValue().ToString().Length == 0)
+                {
+                    JObject jObj = JObject.Parse(item.GetValue().ToString());
+                    string title = jObj["title"].ToString();
+                    bwSubItems.Add(title, jObj);
+                }
+            }
+            foreach (var item in mHost_.GetBranch(@"NETx\XIO\BossWave\Pulishes").BranchFacade.GetItems())
+            {
+                if (item.GetValue().ToString().Length == 0)
+                {
+                    JObject jObj = JObject.Parse(item.GetValue().ToString());
+                    string title = jObj["title"].ToString();
+                    bwPubItems.Add(title, jObj);
+                }
+            }
         }
 
         public override bool Start()
         {
             try
             {
-                mSignalr_.Start();
+                bwSignalR.Start();
             }
             catch (Exception ex)
             {
@@ -107,7 +171,7 @@ namespace BossWavePlugin
         {
             try
             {
-                mSignalr_.Stop();
+                bwSignalR.Stop();
             }
             catch (Exception ex)
             {
@@ -120,110 +184,174 @@ namespace BossWavePlugin
         {
             try
             {
-                mSignalr_.Stop();
+                bwSignalR.Stop();
             }
             catch (Exception ex)
             {
                 mHost_.WriteLog(LogLevel.Error, "Start -> Ex: " + ex);
             }
+            return true;
+        }
+
+        public override void StateChange(BmsServerState oldState, BmsServerState newState){ }
+
+        public bool CreateSubItem(string info)
+        {
+            foreach (var item in mHost_.GetBranch(@"NETx\XIO\BossWave\Subscriptions").BranchFacade.GetItems())
+            {
+                if (item.GetValue().ToString().Length == 0)
+                {
+                    JObject jObj = JObject.Parse(info);
+                    string title = jObj["title"].ToString();
+                    bwSubItems.Add(title, jObj);
+                    Subscribe(jObj);
+                    item.SetValue(new UpdateRequest(info, ItemChangeReason.IoReceived));
+                    break;
+                }
+            }
+            return true;
+        }
+
+        private void Subscribe(JObject info)
+        {
+            try
+            {
+                bool autochain = Boolean.Parse(info["autochain"].ToString());
+                int expirydelta = Int32.Parse(info["expirydelta"].ToString());
+                string ns = info["namespace"].ToString();
+
+                Request subscribeRequest = new RequestUtils(ns, RequestType.SUBSCRIBE)
+                    .SetExpiryDelta(expirydelta)
+                    .SetAutoChain(autochain)
+                    .BuildSubcriber();
+
+                bwClient.Subscribe(subscribeRequest, new ResponseHandler("Subscription to " + info["namespace"].ToString()), new MessageHandler());
+            } catch (Exception e)
+            {
+                mHost_.WriteLog(LogLevel.Error, e.Message);
+            }
+        }
+
+        public bool CreatePubItem(string info)
+        {
+            foreach (var item in mHost_.GetBranch(@"NETx\XIO\BossWave\Pulishes").BranchFacade.GetItems())
+            {
+                if (item.GetValue().ToString().Length == 0)
+                {
+                    JObject jObj = JObject.Parse(info);
+                    string title = jObj["title"].ToString();
+
+                    if (Boolean.Parse(jObj["loop"].ToString()))
+                    {
+                        mHost_.WriteLog(LogLevel.Warning, jObj["loop"].ToString());
+                        loopingPubItems.Add(jObj["title"].ToString(), new Thread(() => PublishLooper(jObj)));
+                        mHost_.WriteLog(LogLevel.Warning, "added thread");
+                        loopingPubItems[jObj["title"].ToString()].Start();
+                        mHost_.WriteLog(LogLevel.Warning, "thread started");
+                    } 
+
+                    bwPubItems.Add(title, jObj);
+                    item.SetValue(new UpdateRequest(info, ItemChangeReason.IoReceived));
+                    break;
+                }
+            }
+            return true;
+        }
+
+        private void PublishLooper(JObject info)
+        {
+            while (true)
+            {
+                try
+                {
+                    RequestUtils publishRequestUtils = new RequestUtils(info["namespace"].ToString(), RequestType.PUBLISH).SetPrimaryAccessChain(info["chain"].ToString());
+
+                    mHost_.WriteLog(LogLevel.Warning, "thread running");
+                    byte[] message = Encoding.UTF8.GetBytes(info["message"].ToString());
+
+                    byte[] text = { 64, 0, 0, 0 };
+
+                    PayloadObject payload = new PayloadObject(new PayloadType(text), message);
+                    publishRequestUtils.AddPayloadObject(payload);
+                    Request publishRequest = publishRequestUtils.BuildPublisher();
+
+                    bwClient.Publish(publishRequest, new ResponseHandler("publish"));
+
+                    Thread.Sleep(Int32.Parse(info["ms"].ToString())); // sleep the stated amount of ms
+                }
+                catch (Exception e)
+                {
+                    mHost_.WriteLog(LogLevel.Error, e.Message);
+                }
+            }
+        }
+
+        private void Publish(JObject info)
+        {
+            try
+            {
+                RequestUtils publishRequestUtils = new RequestUtils(info["namespace"].ToString(), RequestType.PUBLISH).SetPrimaryAccessChain(info["primary-access-chain"].ToString());
+
+                byte[] message = Encoding.UTF8.GetBytes(info["message"].ToString());
+
+                byte[] text = { 64, 0, 0, 0 };
+
+                PayloadObject payload = new PayloadObject(new PayloadType(text), message);
+                publishRequestUtils.AddPayloadObject(payload);
+                Request publishRequest = publishRequestUtils.BuildPublisher();
+
+                bwClient.Publish(publishRequest, new ResponseHandler("publish"));
+            }catch(Exception e)
+            {
+                mHost_.WriteLog(LogLevel.Error, e.Message);
+            }
+        }
+
+        public bool SetEntity(string path)
+        {      
+            try
+            {
+                foreach (var entity in mHost_.GetBranch(@"NETx\XIO\BossWave\Identity").BranchFacade.GetItems())
+                {
+                    if (entity.GetValue().ToString().Length == 0)
+                    {
+                        if(entities.ToArray().Length == 0 || !entities.Any(item => entity.GetValue().ToString() == path))
+                        {
+                            entities.Add(path);
+                            entity.SetValue(new UpdateRequest(path, ItemChangeReason.IoReceived));
+                            bwClient.SetEntity(path, new ResponseHandler("SetEntity()"));
+                            break;
+                        } else
+                        {
+                            return true;
+                        } 
+                    }
+                }
+            } catch (Exception e)
+            {
+                mHost_.WriteLog(LogLevel.Error, e.Message);
+            }
 
             return true;
         }
 
-        public override void StateChange(BmsServerState oldState, BmsServerState newState)
-        {
-            
-        }
-
-
-        protected object mSetLock_ = new object();
-        public void SetItemValue(string itemId, string itemValue)
-        {
-            if(string.IsNullOrEmpty(itemId) || string.IsNullOrEmpty(itemValue))
-            {
-                // ActionHub.Announce("ItemID or Value is empty");
-                return;
-            }
-            lock(mSetLock_)
-            {
-                
-                IItemFacade valueFacade;
-                if(!mItems_.ContainsKey(itemId))
-                {
-                    var cres = mHost_.GetItem(itemId);
-                    if(cres.ResultCode == GetItemResultCodes.OK)
-                    {                       
-                        RegisterItem(cres.ItemFacade);                        
-                    }
-                }
-                if(mItems_.TryGetValue(itemId,out valueFacade))
-                {
-                    valueFacade.SetValue(new UpdateRequest(itemValue, ItemChangeReason.IoReceived));
-                }
-                else
-                {
-                    // ActionHub.Announce("ItemID not valid:" + itemId);
-                }
-            }
-        }
-
-        protected object mExecScriptLock_ = new object();
-        public void ExecLuaScript(string script)
-        {
-            if(string.IsNullOrEmpty(script))
-            {
-                // ActionHub.Announce("Can't execute empty script.");
-                return;
-            }
-           var res =  mHost_.ExecuteLuaScript(script);
-            // ActionHub.Announce("ExecuteScript result" + res.ToString());
-        }
-
-        protected void RegisterTree(IBranchFacade branch)
-        {
-            if (branch != null)
-            {
-                var items = branch.GetItems();
-                foreach (var item in items)
-                {
-                    RegisterItem(item);
-                }
-                var branches = branch.GetBranches();
-                foreach (var subBranch in branches)
-                {
-                    RegisterTree(subBranch);
-                }
-            }
-        }
-
-    
-        protected void RegisterItem(IItemFacade item)
-        {
-           
-            if (item != null)
-            {
-                item.RegisterObserver(mItemObserver__);
-                mItems_[item.ItemId]=item;
-            }
-        }
-
-
-        private void ItemValueChange(object tag, IItemFacade facade)
+        private void BWItemValueChange(object tag, IItemFacade facade)
         {
             try
             {
                 var itemId = facade.ItemId;
-                var newvalue = facade.GetValue();
-                string valStr;
-                try
+                var newvalue = facade.GetValue(); 
+                mHost_.WriteLog(LogLevel.Warning, "changed:" + itemId + " " + newvalue);
+                JObject jObj = JObject.Parse(newvalue.ToString());
+                string title = jObj["title"].ToString();
+                if (bwSubItems.ContainsKey(title))
                 {
-                    valStr = Convert.ToString(newvalue);
+                    bwSubItems[title] = jObj;
                 }
-                catch (Exception)
+                if (bwPubItems.ContainsKey(title))
                 {
-                    valStr = "[Parse Err]";
+                    bwPubItems[title] = jObj;
                 }
-                // ActionHub.Announce(itemId + valStr);
             }
             catch (Exception ex)
             {

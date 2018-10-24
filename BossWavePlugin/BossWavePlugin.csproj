@@ -90,6 +90,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Host\ActionHub.cs" />
+    <Compile Include="Host\MessageHandler.cs" />
+    <Compile Include="Host\Observer.cs" />
+    <Compile Include="Host\ResponseHandler.cs" />
     <Compile Include="Host\Startup.cs" />
     <Compile Include="Host\WebHost.cs" />
     <Compile Include="BossWavePlugin.cs" />

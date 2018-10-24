@@ -5,8 +5,12 @@
     <link rel="shortcut icon" type="image/png" href="img/favicon.png">
     <link rel="stylesheet" type="text/css" href="css/navbar.css">
     <link rel="stylesheet" type="text/css" href="css/background.css"">
+    <link rel="stylesheet" type="text/css" href="css/subscription.css"">
+    <link rel="stylesheet" type="text/css" href="css/publish.css"">
+    <link rel="stylesheet" type="text/css" href="css/entity.css"">
 </head>
 <body class="outer-frame" onmousemove="mouse_position(event)">
+    <script type="text/javascript" src="js/page/frame_logic.js"></script>
     <div id="gripcontainer">
         <div id="grip">
             <div class="verticalline"></div>
@@ -15,20 +19,97 @@
     <div id="nav-bar-id" class="nav-bar-class">
         <div class="nav-modal">
             <span class="close-nav">&times;</span>
-            <ul class="pages">
-                <li><a class="profile" onclick="load_profile()">Profile</a></li>
-                <li><a class="itemtree" onclick="load_items()">Items</a></li>
-                <li><a class="subscribtions" onclick="load_subscribtions()">Subscribtions</a></li>
-                <li><a class="clients" onclick="load_clients()">Clients</a></li>
+            <ul>
+                <li><a class="identity" onclick="open_load_identity()">BossWave Identity</a></li>
             </ul>
             <div id="hr-brick"><hr class="inline-hr" /></div>
             
+            <div class="sub-frame">
+                <ul id="sub-pages" class="subscribe-pages">
+                    <!-- Subscribtions -->
+                </ul>   
+            </div>     
+            <div id="hr-brick"><hr class="inline-hr" /></div>
+            <div class="pub-frame"></div>
+                    <ul id="pub-pages">
+                        <!-- Pulishes -->
+                    </ul>       
+                </div>
+            <div id="hr-brick"><hr class="inline-hr" /></div>
+            <div class="add-setting">
+                    <button onclick="toggle_options()" class="dropdown">Options</button>
+                    <div id="options" class="options-content">
+                        <a id="add-publish">Publishing</a>
+                        <a id="add-subscription">Subscription</a>
+                        <a id="open-log">Log</a>
+                    </div>
+            </div>
+
+
+
+    
+
         </div>
     </div>
+            <!-- Subscription window -->
+            <div id="subscription-window" class="subscription-window-class">
+                    <div class="subscription-window-content">
+                        <span class="close-subscription">&times;</span>
+                        <h4 style="margin-left: 2px; margin-top: 2px;">Create Subscription</h4> 
+                        <div class="subscription-window-content-inner">       
+                            <div style="width: 100%; height: 100px;"></div> 
+                            <input id="subscribtion-title" type="text" name="sub-title" placeholder="Title...">
+                            <div style="width: 80px;height: 10px; float: left;"></div>
+                            <input id="namespace" type="text" name="search" placeholder="Namespace...">
+                            <input id="expirydelta" type="text" name="expirydelta" placeholder="Expiry delta...">
+                            <div style="width: 80px;height: 10px; float: left;"></div>
+                            <input id="expirymili" type="text" name="expirydelta" placeholder="Expiry...">
+                            <input type="checkbox" id="autochain" value="autochain">
+                            <label for="autochain">Auto Chain</label>
+                            <button class="add-sub">Create</button>
+                            <label id="error-label"></label>
+                        </div>
+                    </div>
+                </div>
 
+                <div id="entity-window" class="entity-window-class">
+                        <div class="entity-window-content">
+                            <span class="close-entity">&times;</span>
+                            <h4 style="margin-left: 2px; margin-top: 2px;">Set Entity</h4> 
+                            <div class="entity-window-content-inner">   
+                                <div style="width: 100%; height: 100px;"></div>     
+                                <h4 id="current-entity">No Entity at this point</h4> 
+                                <input style="width: 300px; height: 40px;" id="entity-path" type="text" name="path-entity" placeholder="Path...">
+                                <button class="add-entity">Set Entity</button>
+                                <label id="error-label"></label>
+                            </div>
+                        </div>
+                    </div>
+    
+                <!-- Publish window -->
+                <div id="publish-window" class="publish-window-class">
+                        <div class="publish-window-content">
+                            <span class="close-publish">&times;</span>
+                            <h4 style="margin-left: 2px; margin-top: 2px;">Create Publishing</h4> 
+                            <div class="publish-window-content-inner">        
+                                    <div style="width: 100%; height: 100px;"></div> 
+                                    <input id="publish-title" type="text" name="pub-title" placeholder="Title...">
+                                    <div style="width: 80px;height: 10px; float: left;"></div>
+                                    <input id="namespace-pub" type="text" name="search" placeholder="Namespace...">                                
+                                    <input id="accesschain" type="text" name="acc" placeholder="Primary Access Chain...">
+                                    <div style="width: 80px;height: 10px; float: left;"></div>
+                                    <input id="message-pub" type="text" name="msg" placeholder="Message...">
+                                    <input style="margin-left: 20px;" type="checkbox" id="repeat-publish" value="rp">
+                                    <label for="autochain">Loop</label>
+                                    <input style="width: 50px; float: left;" id="loop-input" type="text" name="lpms" placeholder="5000"> 
+                                    <button class="add-pub">Create</button>
+                                    <label id="error-label-pub"></label>
+                                </div>
+                            </div>
+                        </div>
 
     <div id="body-container" class="container-content">
-            <div style="height:1200px; background-color: cadetblue;"></div>
+            <iframe class="container-content-frame" id="page-content" src="welcome.html" onload="adjust_height(this)"></iframe>
         <hr />
         <footer>
             <p>&copy; @DateTime.Now.Year - BossWave Plugin for NETx BMS : ASP.NET Application</p>
@@ -38,15 +119,17 @@
     <!--Script references. -->
     <!--Reference the jQuery library. -->
     <script src="js/jquery-3.3.1.js" ></script>
-
+    
     <!--Reference the SignalR library. -->
     <script src="js/jquery.signalR-2.3.0.min.js"></script>
-
+    
     <!--Reference the autogenerated SignalR hub script. -->
     <script src="signalr/hubs"></script>
-
+    
     <!--Script to update the page.--> 
     <script src="js/page/base_logic.js"></script>
-    <script src="js/page/nav_logic.js"></script>
+    <script type="text/javascript" src="js/page/nav_logic.js"></script>
+    <script type="text/javascript" src="js/page/subscribe_logic.js"></script>
+    <script type="text/javascript" src="js/page/publish_logic.js"></script>
 </body>
 </html>

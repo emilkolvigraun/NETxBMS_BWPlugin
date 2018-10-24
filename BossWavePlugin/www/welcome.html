@@ -1,0 +1,36 @@
+<link rel="stylesheet" type="text/css" href="css/background.css"">
+    
+<div style="margin-left: 20%;">
+    
+    
+    <h1>Welcome</h1>
+    This the BossWave plugin for NETx BMS Studio.
+    <br> 
+    The project can be found on <a style="color: snow;" href="https://github.com/wizardmil/NETxBMS_BWPlugin" rel="noopener noreferrer" target="_blank">GitHub.</a>
+    <br>
+    <br>
+    <h4>Instructions</h4>
+    <ol>
+        <li>Set your identity by clicking the tab 'BossWave Identity'</li>
+        <ol>
+            <li>Set the path to your entity.</li><br>
+        </ol>
+        <li>Now you can either publish or subscribe to a namespace by clicking 'Add'</li><br>
+        <ol>
+            <li>Publish</li>
+            <ol>
+                <li>Fill out all input fields.</li>
+                <li>You can check off 'loop' and the plugin will publish the message with the declared interval. <br> Default is 5000ms.</li>
+            </ol>
+            <li>Subscribe</li>
+            <ol>
+                <li>Fill out all input fields.</li>
+                <li>It is not nessecary to declare an expiry or an expiry delta, however, it is recommended.</li>
+                <li>If you check off 'auto chain' the plugin will find and use the shortest chain in the wave and catch it.</li>
+                <li>Expiries are in miliseconds.</li>
+            </ol>
+        </ol>
+    </ol>
+
+</div>
+

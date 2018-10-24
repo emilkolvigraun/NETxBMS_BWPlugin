@@ -23,18 +23,7 @@ namespace BossWavePlugin.Host
             string folderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var fileSystem = new PhysicalFileSystem(Path.Combine(folderPath,"www"));
             var options = new FileServerOptions { EnableDirectoryBrowsing = false, FileSystem = fileSystem };
-            options.StaticFileOptions.ContentTypeProvider = new CustomContentTypeProvider();
             app.UseFileServer(options);
-        }
-
-
-        public class CustomContentTypeProvider : FileExtensionContentTypeProvider
-        {
-            public CustomContentTypeProvider()
-            {
-                // make your own  mime settings
-                //Mappings.Add(".nupkg", "application/zip");
-            }
         }
     }
 }
