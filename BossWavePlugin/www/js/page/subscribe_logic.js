@@ -16,7 +16,6 @@ $(".add-sub").on("click", function () {
     var namespace = $("#namespace")[0].value
     var expirymili = $("#expirymili")[0].value
     var autochain = $("#autochain")[0].checked
-    var privacy = $("#privacy")[0].checked
     var label = $("#error-label")[0]
 
     

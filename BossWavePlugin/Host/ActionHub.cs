@@ -60,17 +60,6 @@ namespace BossWavePlugin.Host
             }
         }
 
-        public void CreatePublishing(string info)
-        {
-            if (BossWavePlugin.Instance != null)
-            {
-                if (BossWavePlugin.Instance.CreatePubItem(info))
-                {
-                    Clients.Client(Context.ConnectionId).updatePub(BossWavePlugin.Instance.bwPubItems.Keys);
-                }
-            }
-        }
-
         public void LoadSubscriptions()
         {
             if (BossWavePlugin.Instance != null)

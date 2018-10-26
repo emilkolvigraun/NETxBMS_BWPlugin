@@ -23,10 +23,9 @@ $(".add-pub").on("click", function () {
     if (title == '' || namespace == '' || message == '' || chain == ''){
         label.innerHTML += "You need to enter a title and a namespace<br>";
     } else {
-        pub_info = '{ "itemid": ' + id + ', "title": ' + title + '", "message": "' + message + '", "loop": "' + loop + '", "chain": "' + chain + '", "namespace": "' + namespace + '", "ms": "' + ms + '" }'
+        pub_info = '{ "itemid": "' + id + '", "title": ' + title + '", "message": "' + message + '", "loop": "' + loop + '", "chain": "' + chain + '", "namespace": "' + namespace + '", "ms": "' + ms + '" }'
 
         actionhub.server.createPublishing(pub_info)
-        console.log("createPublishing")
         close_all_windows()       
         title = '';
         label.innerHTML = '';

@@ -90,6 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Host\ActionHub.cs" />
+    <Compile Include="Host\LogHub.cs" />
     <Compile Include="Host\MessageHandler.cs" />
     <Compile Include="Host\Observer.cs" />
     <Compile Include="Host\ResponseHandler.cs" />

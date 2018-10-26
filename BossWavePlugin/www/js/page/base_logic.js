@@ -1,4 +1,5 @@
 ﻿var hub = $.connection.hub;
+var loghub = $.connection.logHub;
 var actionhub = $.connection.actionHub;
 
 hub.logging = true;
@@ -6,10 +7,13 @@ hub.start().done(function () {
     actionhub.server.loadSubscriptions();
     actionhub.server.loadPublishes();
     actionhub.server.toggleEntity();
+    loghub.server.activateLogging();
     console.log("Connection established.");
 }).fail(function (reason) {
     console.log("Connection failed: " + reason + ".");
 });
+
+
 
 actionhub.client.entityHasBeenSet = function (path) {  
     var label = $("#current-entity")[0];

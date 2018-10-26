@@ -96,11 +96,6 @@ $(".add-entity").on("click", function () {
     entity_modal.value = '';
 });
 
-$("#open-log").on("click", function () { 
-    var page = $("#page-content")[0];
-    page.src = 'log.html'
-});
-
 function open_load_identity() {  
     document.body.className = 'temp-disable-scroll';
     entity_modal.style.display = "block";

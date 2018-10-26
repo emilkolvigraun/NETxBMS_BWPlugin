@@ -34,7 +34,7 @@ namespace BossWavePlugin
         public Dictionary<string, Thread> loopingPubItems;
         public List<string> entities;
 
-        BossWaveClient bwClient;
+        public BossWaveClient bwClient;
 
         public JObject config;
 
@@ -47,7 +47,7 @@ namespace BossWavePlugin
         {
             host = mHost_;
 
-            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\bwconfig.json";
+            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\etc\\bwconfig.json";
             using (StreamReader r = new StreamReader(path))
             {
                 config = JObject.Parse(r.ReadToEnd());
@@ -171,6 +171,7 @@ namespace BossWavePlugin
         {
             try
             {
+                LogWriter.Stop();
                 bwSignalR.Stop();
             }
             catch (Exception ex)
@@ -227,81 +228,6 @@ namespace BossWavePlugin
 
                 bwClient.Subscribe(subscribeRequest, new ResponseHandler("Subscription to " + info["namespace"].ToString()), new MessageHandler());
             } catch (Exception e)
-            {
-                mHost_.WriteLog(LogLevel.Error, e.Message);
-            }
-        }
-
-        public bool CreatePubItem(string info)
-        {
-            foreach (var item in mHost_.GetBranch(@"NETx\XIO\BossWave\Pulishes").BranchFacade.GetItems())
-            {
-                if (item.GetValue().ToString().Length == 0)
-                {
-                    JObject jObj = JObject.Parse(info);
-                    string title = jObj["title"].ToString();
-
-                    if (Boolean.Parse(jObj["loop"].ToString()))
-                    {
-                        mHost_.WriteLog(LogLevel.Warning, jObj["loop"].ToString());
-                        loopingPubItems.Add(jObj["title"].ToString(), new Thread(() => PublishLooper(jObj)));
-                        mHost_.WriteLog(LogLevel.Warning, "added thread");
-                        loopingPubItems[jObj["title"].ToString()].Start();
-                        mHost_.WriteLog(LogLevel.Warning, "thread started");
-                    } 
-
-                    bwPubItems.Add(title, jObj);
-                    item.SetValue(new UpdateRequest(info, ItemChangeReason.IoReceived));
-                    break;
-                }
-            }
-            return true;
-        }
-
-        private void PublishLooper(JObject info)
-        {
-            while (true)
-            {
-                try
-                {
-                    RequestUtils publishRequestUtils = new RequestUtils(info["namespace"].ToString(), RequestType.PUBLISH).SetPrimaryAccessChain(info["chain"].ToString());
-
-                    mHost_.WriteLog(LogLevel.Warning, "thread running");
-                    byte[] message = Encoding.UTF8.GetBytes(info["message"].ToString());
-
-                    byte[] text = { 64, 0, 0, 0 };
-
-                    PayloadObject payload = new PayloadObject(new PayloadType(text), message);
-                    publishRequestUtils.AddPayloadObject(payload);
-                    Request publishRequest = publishRequestUtils.BuildPublisher();
-
-                    bwClient.Publish(publishRequest, new ResponseHandler("publish"));
-
-                    Thread.Sleep(Int32.Parse(info["ms"].ToString())); // sleep the stated amount of ms
-                }
-                catch (Exception e)
-                {
-                    mHost_.WriteLog(LogLevel.Error, e.Message);
-                }
-            }
-        }
-
-        private void Publish(JObject info)
-        {
-            try
-            {
-                RequestUtils publishRequestUtils = new RequestUtils(info["namespace"].ToString(), RequestType.PUBLISH).SetPrimaryAccessChain(info["primary-access-chain"].ToString());
-
-                byte[] message = Encoding.UTF8.GetBytes(info["message"].ToString());
-
-                byte[] text = { 64, 0, 0, 0 };
-
-                PayloadObject payload = new PayloadObject(new PayloadType(text), message);
-                publishRequestUtils.AddPayloadObject(payload);
-                Request publishRequest = publishRequestUtils.BuildPublisher();
-
-                bwClient.Publish(publishRequest, new ResponseHandler("publish"));
-            }catch(Exception e)
             {
                 mHost_.WriteLog(LogLevel.Error, e.Message);
             }
