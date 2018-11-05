@@ -1,0 +1,12 @@
+{
+    "sub-items": 10,
+    "pub-items" : 10,
+    "entity-items" : 10,
+    "entity" : "C:/Users/Emil S. Kolvig-Raun/stubbe.ent",
+    "namespace-to-pub" : "netx_test.cfei.ba/sharptesting",
+    "primary-access-chain" : "nw0ChNe30YJBq4Q1LzI2TefzcfypV6-vYYOc_cUaaRc=",
+    "primary-access-chain-to-pub" : "nw0ChNe30YJBq4Q1LzI2TefzcfypV6-vYYOc_cUaaRc=",
+    "subscriptions" : {
+        "sharptesting" : "netx_test.cfei.ba/sharptesting"
+    }
+}
